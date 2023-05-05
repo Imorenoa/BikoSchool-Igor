@@ -1,18 +1,28 @@
-import { createServer } from "http";
-import chalk from "chalk";
+import { createServer, Server, IncomingMessage, ServerResponse } from 'http'
+import { totalmem, freemem, cpuCount, cpuUsage } from 'os-utils'
+import * as fs from 'fs';
 
-const myString: string = "BikoSchool";
+const chalk = require('chalk')
 
-const hostname = "127.0.0.1";
+const port: number = 3001
 
-const port: number = 3000;
+const server: Server = createServer((req: IncomingMessage, res: ServerResponse) => {
+  console.log(`${chalk.bgBlue(req.method)} - ${chalk.blue(req.url)}`)
 
-const server = createServer((req, res) => {
-  console.log(chalk.blue("Peticion realizada"));
-  console.log(res.statusCode);
-  res.end(myString);
-});
+  cpuUsage(cpuUsagePercentage => {
+    const data = JSON.stringify({
+      totalmem: totalmem(),
+      freemem: freemem(),
+      cpuCount: cpuCount(),
+      cpuUsagePercentage
+    });
+    fs.writeFile('cpu_usage.json', data, err => {
+      if (err) throw err;
+      console.log('CPU usage written to file.');
+    });
+    res.end(data);
+  });
+})
 
-server.listen(port, hostname, () => {
-  console.log(chalk.green(`Server running at http://${hostname}:${port}/`));
-});
+
+server.listen(port, () => console.log(chalk.black.bgGreen(`Server listening at port ${port}`)))
