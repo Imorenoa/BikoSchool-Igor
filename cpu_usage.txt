@@ -1,0 +1,1 @@
+CPU usage percentage: 0.08%
